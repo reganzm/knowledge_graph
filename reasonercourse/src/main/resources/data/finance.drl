@@ -1,0 +1,23 @@
+package data.rules;
+dialect  "mvel"
+
+// 导入所需的类
+import drools.Triple
+
+// finance:hold_share(X,Y) :- finance:control(X,Y).
+rule "finance1"
+    when
+        c1: Triple($X: subject, predicate == "<http://www.example.org/kse/finance#control>", $Y: object)
+    then
+        insert(new Triple($X, "<http://www.example.org/kse/finance#hold_share>", $Y));
+end
+
+// finance:conn_trans(Y,Z) :- finance:hold_share(X,Y), finance:hold_share(X,Z).
+rule "finance2"
+    when
+        c1: Triple($X: subject, predicate == "<http://www.example.org/kse/finance#hold_share>", $Y: object)
+        c2: Triple(subject == $X, predicate == "<http://www.example.org/kse/finance#hold_share>", $Z: object)
+    then
+        insert(new Triple($Y, "<http://www.example.org/kse/finance#conn_trans>", $Z))
+end
+

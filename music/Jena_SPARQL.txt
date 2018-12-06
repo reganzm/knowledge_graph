@@ -1,0 +1,211 @@
+1.查询某一艺术家的所有歌曲
+
+PREFIX music: <http://kg.course/music/>
+
+SELECT  DISTINCT   ?trackID
+WHERE { 
+  ?trackID  music:track_artist  music:artist_01
+}
+
+
+
+2.查询某一艺术家的所有歌曲的歌曲名
+
+PREFIX music: <http://kg.course/music/>
+
+SELECT ?name
+WHERE {
+  ?trackID  music:track_artist music:artist_01  .
+  ?trackID  music:track_name  ?name
+ }
+
+
+3.查询某一首歌曲名的专辑信息
+PREFIX music: <http://kg.course/music/>
+
+SELECT ?trackID ?ablumID ?name
+WHERE { 
+ ?trackID    music:track_name     "track_name_00001"  .  
+ ?trackID    music:track_album    ?ablumID .
+ ?ablumID    music:ablum_name     ?name 
+}
+
+
+ 4. 查询某一首歌曲名的专辑信息，使用中文来当变量名
+
+PREFIX music: <http://kg.course/music/>
+
+SELECT ?歌曲id ?专辑id ?专辑名 
+WHERE {
+  ?歌曲id  music:track_name   "track_name_00001"   . 
+  ?歌曲id  music:track_album  ?专辑id  . 
+  ?专辑id  music:album_name   ?专辑名
+}
+
+5.查询某一首歌曲名的专辑信息，变量名添加描述
+
+PREFIX music: <http://kg.course/music/>
+
+SELECT ?歌曲id ?专辑id (CONCAT("专辑名",":",?专辑名) AS ?专辑信息)
+WHERE {
+  ?歌曲id  music:track_name   "track_name_00001"   . 
+  ?歌曲id  music:track_album  ?专辑id  . 
+  ?专辑id  music:album_name   ?专辑名
+}
+
+
+6.查询某个专辑里面的所有歌曲
+PREFIX music: <http://kg.course/music/>
+
+SELECT  ?trackID
+WHERE {
+  ?albumID    music:album_name   "album_name_0002"  .  
+  ?trackID    music:track_album   ?albumID 
+}
+
+
+7.查询某个专辑里面的所有歌曲,限制前2 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?S  ?P
+WHERE {
+  ?subject  ?predicate  "ablum_name_0002" .
+  ?S        ?P           ?subject
+}
+limit 2
+
+8.对某个专辑里面的所有歌曲计数
+PREFIX music: <http://kg.course/music/>
+
+SELECT  (COUNT(?trackID) as ?num)
+WHERE {
+  ?albumID    music:album_name   "album_name_0002"  .  
+  ?trackID    music:track_album   ?albumID 
+}
+
+
+9.查询某一首歌是哪一个艺术家的作品
+PREFIX music: <http://kg.course/music/>
+
+SELECT ?trackID  ?artistID 
+WHERE {  
+?trackID  music:track_name   "track_name_00001"  .  
+?trackID music:track_artist ?artistID 
+}
+
+
+ 10.查询某一首歌属于什么歌曲类型
+PREFIX music: <http://kg.course/music/>
+
+SELECT  ?trackID ?tag_name 
+WHERE {  
+?trackID  music:track_name   "track_name_00001" .  
+?trackID  music:track_tag    ?tag_name  
+}
+
+ 11.查询某一艺术家唱过歌曲的所有标签
+
+PREFIX music: <http://kg.course/music/>
+
+SELECT  DISTINCT ?tag_name
+WHERE { 
+ ?trackID    music:track_artist  music:artist_001  .  
+ ?trackID    music:track_tag    ?tag_name
+ }
+
+12.查询某一艺术家唱过歌曲的所有类型并排序
+PREFIX music: <http://kg.course/music/>
+
+SELECT  DISTINCT ?tag_name
+WHERE { 
+ ?trackID    music:track_artist  music:artist_001  .  
+ ?trackID    music:track_tag    ?tag_name
+ }
+
+ORDER BY ?tag_name
+
+
+13.查询某几类歌曲标签中的歌曲的数目
+PREFIX music: <http://kg.course/music/>
+
+SELECT  (COUNT(?trackID ) AS ?num) 
+WHERE {  
+{    
+ ?trackID  music:track_tag    "tag_name_01" .  
+}   
+UNION 
+{   
+   ?trackID music:track_tag   "tag_name_02"  .  
+} 
+}
+
+
+PREFIX music: <http://kg.course/music/>
+
+SELECT  (count(?trackID ) as ?num)
+WHERE { 
+ ?trackID music:track_tag  ?tag_name
+ FILTER (?tag_name = "tag_name_01"|| ?tag_name = "tag_name_02")
+ }
+
+
+
+14.查询所有歌曲中带有’xx’字符的歌曲名
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?subject  ?object
+WHERE {
+  ?subject <http://kg.course/music/track_name>  ?object .
+  FILTER  regex(?object,"088")
+}
+
+15.询问是否存在带有’xx’字符的歌曲名
+PREFIX music: <http://kg.course/music/>
+
+ASK  
+{ 
+  ?trackID  music:track_name  ?track_name . 
+  FILTER    regex(?track_name,"008")
+}
+
+
+16.给艺术家id新增属性艺术家名字
+
+PREFIX music: <http://kg.course/music/>
+
+INSERT DATA
+{
+  music:arttist_01  music:artist_name  "artist_name_01" . 
+  music:arttist_02  music:artist_name  "artist_name_02" .
+  music:arttist_03  music:artist_name  "artist_name_03" .
+}
+
+
+PREFIX music: <http://kg.course/music/>
+
+SELECT  ?artistID  ?artist_name
+WHERE {
+  ?artistID  music:artist_name ?artist_name 
+}
+
+
+17.删除增加的属性艺术家名字
+
+PREFIX music: <http://kg.course/music/>
+
+DELETE 
+{  
+  music:artist_02   music:artist_name ?x .
+}
+WHERE 
+{ 
+   music:artist_02  music:artist_name ?x .
+}
+
+PREFIX music: <http://kg.course/music/>
+
+SELECT  ?artistID  ?artist_name
+WHERE {
+  ?artistID  music:artist_name ?artist_name 
+}
+
